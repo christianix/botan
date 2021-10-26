@@ -35,6 +35,7 @@ Client_Impl_13::Client_Impl_13(Callbacks& callbacks,
    m_creds(creds),
    m_info(info)
    {
+   BOTAN_UNUSED(m_creds); // TODO: fixme
    Handshake_State& state = create_handshake_state(offer_version);
    send_client_hello(state, offer_version, next_protocols);
    }
