@@ -46,9 +46,11 @@ std::vector<uint8_t> make_hello_random(RandomNumberGenerator& rng,
    std::vector<uint8_t> buf(32);
    rng.randomize(buf.data(), buf.size());
 
-   auto sha256 = HashFunction::create_or_throw("SHA-256");
-   sha256->update(buf);
-   sha256->final(buf);
+   // TODO: We use a fixed output RNG in test_tls_rfc8448 to produce
+   //       the expected client_hello. Disable this on demand only.
+   // auto sha256 = HashFunction::create_or_throw("SHA-256");
+   // sha256->update(buf);
+   // sha256->final(buf);
 
    if(policy.include_time_in_hello_random())
       {
@@ -122,7 +124,7 @@ Client_Hello_Impl::Client_Hello_Impl(Handshake_IO& io,
    * We always add the EMS extension, even if not used in the original session.
    * If the server understands it and follows the RFC it should reject our resume
    * attempt and upgrade us to a new session with the EMS protection.
-   * 
+   *
    * Used by default independent of protocol version.
    * RFC 8446: Appendix D.
    */

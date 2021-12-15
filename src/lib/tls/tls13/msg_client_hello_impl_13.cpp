@@ -32,7 +32,7 @@ Client_Hello_Impl_13::Client_Hello_Impl_13(Handshake_IO& io,
    m_version = Protocol_Version::TLS_V12;
 
    //TODO: Compatibility mode, does not need to be random
-   m_session_id = make_hello_random(rng, policy);
+   // m_session_id = make_hello_random(rng, policy);
 
    m_extensions.add(new Supported_Groups(policy.key_exchange_groups()));
 

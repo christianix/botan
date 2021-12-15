@@ -100,6 +100,7 @@ std::vector<std::string> Policy::allowed_key_exchange_methods() const
       //"RSA",
       //"IMPLICIT",
       //TODO: allow TLS 1.3 ciphers with UNDEFINED kex algo
+      "UNDEFINED",
       };
    }
 
@@ -111,6 +112,7 @@ std::vector<std::string> Policy::allowed_signature_methods() const
       //"DSA",
       //"IMPLICIT",
       //TODO: allow TLS 1.3 ciphers with UNDEFINED sig meth
+      "UNDEFINED",
       };
    }
 
@@ -306,7 +308,7 @@ bool Policy::allow_client_initiated_renegotiation() const { return false; }
 bool Policy::allow_server_initiated_renegotiation() const { return false; }
 bool Policy::allow_insecure_renegotiation() const { return false; }
 bool Policy::allow_tls12()  const { return true; }
-bool Policy::allow_tls13() const 
+bool Policy::allow_tls13() const
    {
 #if defined(BOTAN_HAS_TLS_13)
    return true;
@@ -577,7 +579,7 @@ std::vector<std::string> Strict_Policy::allowed_key_exchange_methods() const
    }
 
 bool Strict_Policy::allow_tls12()  const { return true;  }
-bool Strict_Policy::allow_tls13()  const 
+bool Strict_Policy::allow_tls13()  const
 {
 #if defined(BOTAN_HAS_TLS_13)
    return true;
