@@ -238,7 +238,7 @@ class Client_Context : public TLS_Context
       Client_Context(std::unique_ptr<Botan::RandomNumberGenerator> rng_in)
          : TLS_Context(std::move(rng_in))
          , client(callbacks, session_mgr, creds, policy, *rng,
-                  Botan::TLS::Server_Information(),
+                  Botan::TLS::Server_Information("server"),
                   Botan::TLS::Protocol_Version::TLS_V13)
          {}
 
@@ -272,21 +272,18 @@ class Test_TLS_RFC8448 final : public Test
 
 
          const auto expected_hello = Botan::hex_decode(
-         "16 03 01 00 c4 01 00 00 c0 03 03 cb"
-         "34 ec b1 e7 81 63 ba 1c 38 c6 da cb 19 6a 6d ff a2 1a 8d 99 12"
-         "ec 18 a2 ef 62 83 02 4d ec e7 00 00 06 13 01 13 03 13 02 01 00"
-         "00 91 00 00 00 0b 00 09 00 00 06 73 65 72 76 65 72 ff 01 00 01"
-         "00 00 0a 00 14 00 12 00 1d 00 17 00 18 00 19 01 00 01 01 01 02"
-         "01 03 01 04 00 23 00 00 00 33 00 26 00 24 00 1d 00 20 99 38 1d"
-         "e5 60 e4 bd 43 d2 3d 8e 43 5a 7d ba fe b3 c0 6e 51 c1 3c ae 4d"
-         "54 13 69 1e 52 9a af 2c 00 2b 00 03 02 03 04 00 0d 00 20 00 1e"
-         "04 03 05 03 06 03 02 03 08 04 08 05 08 06 04 01 05 01 06 01 02"
-         "01 04 02 05 02 06 02 02 02 00 2d 00 02 01 01 00 1c 00 02 40 01");
+           "16 03 01 00 c4 01 00 00 c0 03 03 cb"
+           "34 ec b1 e7 81 63 ba 1c 38 c6 da cb 19 6a 6d ff a2 1a 8d 99 12"
+           "ec 18 a2 ef 62 83 02 4d ec e7 00 00 06 13 01 13 03 13 02 01 00"
+           "00 91 00 00 00 0b 00 09 00 00 06 73 65 72 76 65 72 ff 01 00 01"
+           "00 00 0a 00 14 00 12 00 1d 00 17 00 18 00 19 01 00 01 01 01 02"
+           "01 03 01 04 00 23 00 00 00 33 00 26 00 24 00 1d 00 20 99 38 1d"
+           "e5 60 e4 bd 43 d2 3d 8e 43 5a 7d ba fe b3 c0 6e 51 c1 3c ae 4d"
+           "54 13 69 1e 52 9a af 2c 00 2b 00 03 02 03 04 00 0d 00 20 00 1e"
+           "04 03 05 03 06 03 02 03 08 04 08 05 08 06 04 01 05 01 06 01 02"
+           "01 04 02 05 02 06 02 02 02 00 2d 00 02 01 01 00 1c 00 02 40 01");
 
-         // TODO: this test requires certain modules to be enabled in order to produce the correct cipher suites
-
-         result.test_eq("TLS client hello",
-             client_hello_record, expected_hello);
+         result.test_eq("TLS client hello", client_hello_record, expected_hello);
 
          // RFC8446 5.1
          // legacy_record_version:  MUST be set to 0x0303 for all records
@@ -308,7 +305,9 @@ class Test_TLS_RFC8448 final : public Test
 
          Botan::TLS::Client_Hello hello(client_hello);
          result.test_eq("only one supported version", hello.supported_versions().size(), 1);
-         result.test_int_eq("Supported Version is 1.3", hello.supported_versions().front().version_code(), Botan::TLS::Protocol_Version::TLS_V13);
+         result.test_int_eq("Supported Version is 1.3",
+                            hello.supported_versions().front().version_code(),
+                            Botan::TLS::Protocol_Version::TLS_V13);
 
          // ----
 
@@ -319,11 +318,11 @@ class Test_TLS_RFC8448 final : public Test
          //   session_id: None, cipher: 0x1301(AES_128_GCM_SHA256),
          //   compression: Null, ext: [...]
          const auto server_hello = Botan::hex_decode(
-         "16 03 03 00 5a 02 00 00 56 03 03 a6"
-         "af 06 a4 12 18 60 dc 5e 6e 60 24 9c d3 4c 95 93 0c 8a c5 cb 14"
-         "34 da c1 55 77 2e d3 e2 69 28 00 13 01 00 00 2e 00 33 00 24 00"
-         "1d 00 20 c9 82 88 76 11 20 95 fe 66 76 2b db f7 c6 72 e1 56 d6"
-         "cc 25 3b 83 3d f1 dd 69 b1 b0 4e 75 1f 0f 00 2b 00 02 03 04");
+           "16 03 03 00 5a 02 00 00 56 03 03 a6"
+           "af 06 a4 12 18 60 dc 5e 6e 60 24 9c d3 4c 95 93 0c 8a c5 cb 14"
+           "34 da c1 55 77 2e d3 e2 69 28 00 13 01 00 00 2e 00 33 00 24 00"
+           "1d 00 20 c9 82 88 76 11 20 95 fe 66 76 2b db f7 c6 72 e1 56 d6"
+           "cc 25 3b 83 3d f1 dd 69 b1 b0 4e 75 1f 0f 00 2b 00 02 03 04");
 
          // ctx.client.received_data(server_hello);
 

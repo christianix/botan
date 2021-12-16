@@ -34,6 +34,8 @@ Client_Hello_Impl_13::Client_Hello_Impl_13(Handshake_IO& io,
    //TODO: Compatibility mode, does not need to be random
    // m_session_id = make_hello_random(rng, policy);
 
+   m_extensions.add(new Server_Name_Indicator(client_settings.hostname()));
+
    m_extensions.add(new Supported_Groups(policy.key_exchange_groups()));
 
    m_extensions.add(new Signature_Algorithms(policy.acceptable_signature_schemes()));
