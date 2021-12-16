@@ -731,10 +731,7 @@ std::vector<uint8_t> Key_Share_Entry::serialize() const
    buf.push_back(get_byte<0>(key_exchange_len));
    buf.push_back(get_byte<1>(key_exchange_len));
 
-   for (const auto& key_exchange_byte : m_key_exchange)
-      {
-      buf.push_back(key_exchange_byte);
-      }
+   buf.insert(std::end(buf), std::cbegin(m_key_exchange), std::end(m_key_exchange));
 
    return buf;
    }

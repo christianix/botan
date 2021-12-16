@@ -283,6 +283,19 @@ class Test_TLS_RFC8448 final : public Test
            "04 03 05 03 06 03 02 03 08 04 08 05 08 06 04 01 05 01 06 01 02"
            "01 04 02 05 02 06 02 02 02 00 2d 00 02 01 01 00 1c 00 02 40 01");
 
+         // expected extensions
+         // 0000 000b 0009000006736572766572 -- SNI
+         // ff01 0001 00 -- Renegotiation
+         // 000a 0014 0012 001d 0017 0018 0019 0100 0101 0102 0103 0104 -- Supported Groups
+         // 0023 0000 -- Session Ticket
+         // 0033 0026 0024 001d 0020 99381de560e4bd43d23d8e435a7dbafeb3c06e51c13cae4d5413691e529aaf2c -- KeyShare (X25519)
+         //      private key from RFC:
+         //      49 af 42 ba 7f 79 94 85 2d 71 3e f2 78 4b cb ca a7 91 1d e2 6a dc 56 42 cb 63 45 40 e7 ea 50 05
+         // 002b 0003 02 0304 -- Supported Versions
+         // 000d 0020 001e 0403 0503 0603 0203 08040805080604010501060102010402050206020202 -- Signature Algorithms
+         // 002d 0002 01 01 -- Psk Exchange Modes
+         // 001c 0002 4001 -- Record Size Limit
+
          result.test_eq("TLS client hello", client_hello_record, expected_hello);
 
          // RFC8446 5.1

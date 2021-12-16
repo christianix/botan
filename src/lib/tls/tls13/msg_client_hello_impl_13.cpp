@@ -11,6 +11,8 @@
 #include <botan/internal/tls_handshake_hash.h>
 #include <botan/internal/msg_client_hello_impl_13.h>
 
+#include <botan/hex.h> // TODO remove
+
 namespace Botan {
 
 namespace TLS {
@@ -34,13 +36,20 @@ Client_Hello_Impl_13::Client_Hello_Impl_13(Handshake_IO& io,
    //TODO: Compatibility mode, does not need to be random
    // m_session_id = make_hello_random(rng, policy);
 
+   // TODO: check when to set these -- setting for rfc8448 now
    m_extensions.add(new Server_Name_Indicator(client_settings.hostname()));
+
+   m_extensions.add(new Renegotiation_Extension());
+
+   m_extensions.add(new Session_Ticket());
 
    m_extensions.add(new Supported_Groups(policy.key_exchange_groups()));
 
    m_extensions.add(new Signature_Algorithms(policy.acceptable_signature_schemes()));
 
-   //TODO: Mandatory Key Share extension to be added
+   // TODO: generate and store private key and derive public key
+   auto pubkey = Botan::hex_decode("99381de560e4bd43d23d8e435a7dbafeb3c06e51c13cae4d5413691e529aaf2c");
+   m_extensions.add(new Key_Share(std::vector{Key_Share_Entry(policy.key_exchange_groups().front(), pubkey)}));
 
    m_extensions.add(new Supported_Versions(client_settings.protocol_version(), policy));
 
