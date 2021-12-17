@@ -13,6 +13,7 @@
     defined(BOTAN_HAS_AEAD_CHACHA20_POLY1305) && \
     defined(BOTAN_HAS_AEAD_GCM) && \
     defined(BOTAN_HAS_AES) && \
+    defined(BOTAN_HAS_CURVE_25519) && \
     defined(BOTAN_HAS_SHA2_32) && \
     defined(BOTAN_HAS_SHA2_64)
 #define BOTAN_CAN_RUN_TEST_TLS_RFC8448
@@ -257,9 +258,10 @@ class Test_TLS_RFC8448 final : public Test
          //       client hello anyway -- revert
          auto rng = std::make_unique<Botan_Tests::Fixed_Output_RNG>("");
          rng->add_entropy(std::vector<uint8_t>(32).data(), 32);  // used by session mgr for session key
-         add_entropy(*rng, "cb34ecb1e78163ba1c38c6dacb196a6dffa21a8d9912ec18a2ef6283024dece7");
+         add_entropy(*rng, "cb34ecb1e78163ba1c38c6dacb196a6dffa21a8d9912ec18a2ef6283024dece7"); // for client hello random
 
-         rng->add_entropy(std::vector<uint8_t>(1024).data(), 1024);
+         // for KeyShare extension (RFC 8448: "{client} create an ephemeral x25519 key pair")
+         add_entropy(*rng, "49af42ba7f7994852d713ef2784bcbcaa7911de26adc5642cb634540e7ea5005");
 
          Client_Context ctx(std::move(rng));
          result.confirm("client not closed", !ctx.client.is_closed());
