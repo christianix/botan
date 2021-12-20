@@ -8,10 +8,6 @@
 #include <botan/tls_callbacks.h>
 #include <botan/tls_exceptn.h>
 
-#if defined(BOTAN_HAS_CURVE_25519)
-#include <botan/curve25519.h>
-#endif
-
 #include <botan/dh.h>
 #include <botan/ecdh.h>
 
@@ -55,30 +51,7 @@ Client_Hello_Impl_13::Client_Hello_Impl_13(Handshake_IO& io,
 
    m_extensions.add(new Signature_Algorithms(policy.acceptable_signature_schemes()));
 
-   const auto selected_group = policy.key_exchange_groups().front(); // TODO choose wisely
-
-   std::unique_ptr<Private_Key> private_key;
-   std::vector<uint8_t> public_key;
-
-   if(selected_group == Group_Params::NONE)  // this cannot really happen, handle in else
-      throw TLS_Exception(Alert::HANDSHAKE_FAILURE, "Could not agree with the client");
-
-   if (group_param_is_dh(selected_group)) {
-      // TODO: should this use TLS::Callbacks::tls_decode_group_param
-      private_key.reset(new DH_PrivateKey(rng, DL_Group(group_param_to_string(selected_group))));
-   } else
-   // TODO others (see msg_server_kex)
-   if(selected_group == Group_Params::X25519) {
-#if defined(BOTAN_HAS_CURVE_25519)
-      auto x25519 = std::make_unique<X25519_PrivateKey>(rng);
-      public_key = x25519->public_value();
-      private_key.reset(x25519.release());
-#else
-      throw Internal_Error("Selected X25519 somehow, but it is disabled");
-#endif
-   }
-
-   m_extensions.add(new Key_Share(std::vector{Key_Share_Entry(selected_group, public_key)}));
+   m_extensions.add(new Key_Share(policy, rng));
 
    m_extensions.add(new Supported_Versions(client_settings.protocol_version(), policy));
 
