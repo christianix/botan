@@ -29,6 +29,7 @@ namespace TLS {
 
 #if defined(BOTAN_HAS_TLS_13)
 class Key_Share_Content;
+class Callbacks;
 #endif
 class Policy;
 class TLS_Data_Reader;
@@ -526,7 +527,7 @@ class BOTAN_UNSTABLE_API Key_Share final : public Extension
                          Connection_Side from);
 
       // constuctor used for ClientHello msg
-      explicit Key_Share(const Policy& policy, RandomNumberGenerator& rng);
+      explicit Key_Share(const Policy& policy, Callbacks& cb, RandomNumberGenerator& rng);
 
       // constuctor used for ServerHello msg
       // explicit Key_Share(const Key_Share_Entry& server_share);

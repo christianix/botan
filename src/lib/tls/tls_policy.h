@@ -104,6 +104,12 @@ class BOTAN_PUBLIC_API(2,0) Policy
 
       /**
       * Request that ECC curve points are sent compressed
+      * This does not have an effect on TLS 1.3 as it always uses uncompressed ECC points.
+      *
+      * RFC 8446 P. 50:
+      *    Versions of TLS prior to 1.3 permitted point format
+      *    negotiation; TLS 1.3 removes this feature in favor of a single point
+      *    format for each curve.
       */
       virtual bool use_ecc_point_compression() const;
 

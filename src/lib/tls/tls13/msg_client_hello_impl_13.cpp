@@ -51,7 +51,7 @@ Client_Hello_Impl_13::Client_Hello_Impl_13(Handshake_IO& io,
 
    m_extensions.add(new Signature_Algorithms(policy.acceptable_signature_schemes()));
 
-   m_extensions.add(new Key_Share(policy, rng));
+   m_extensions.add(new Key_Share(policy, cb, rng));
 
    m_extensions.add(new Supported_Versions(client_settings.protocol_version(), policy));
 
