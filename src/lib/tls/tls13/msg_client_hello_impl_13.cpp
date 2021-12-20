@@ -8,7 +8,10 @@
 #include <botan/tls_callbacks.h>
 #include <botan/tls_exceptn.h>
 
+#if defined(BOTAN_HAS_CURVE_25519)
 #include <botan/curve25519.h>
+#endif
+
 #include <botan/dh.h>
 #include <botan/ecdh.h>
 
