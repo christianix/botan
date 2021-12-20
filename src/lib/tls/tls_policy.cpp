@@ -185,6 +185,16 @@ std::vector<Group_Params> Policy::key_exchange_groups() const
       };
    }
 
+std::vector<Group_Params> Policy::key_exchange_groups_to_offer() const
+   {
+   // by default, we offer a key share for the most-preferred group, only
+   std::vector<Group_Params> groups_to_offer;
+   const auto supported_groups = key_exchange_groups();
+   if (!supported_groups.empty())
+      groups_to_offer.push_back(supported_groups.front());
+   return groups_to_offer;
+   }
+
 size_t Policy::minimum_dh_group_size() const
    {
    return 2048;
@@ -536,6 +546,13 @@ void Policy::print(std::ostream& o) const
    print_vec(o, "signature_methods", allowed_signature_methods());
    print_vec(o, "key_exchange_methods", allowed_key_exchange_methods());
    print_vec(o, "key_exchange_groups", key_exchange_groups());
+
+   const auto groups_to_offer = key_exchange_groups_to_offer();
+   if (groups_to_offer.empty()) {
+      print_vec(o, "key_exchange_groups_to_offer", { std::string("none") });
+   } else {
+      print_vec(o, "key_exchange_groups_to_offer", groups_to_offer);
+   }
 
    print_bool(o, "allow_insecure_renegotiation", allow_insecure_renegotiation());
    print_bool(o, "include_time_in_hello_random", include_time_in_hello_random());

@@ -92,6 +92,17 @@ class BOTAN_PUBLIC_API(2,0) Policy
       virtual std::vector<Group_Params> key_exchange_groups() const;
 
       /**
+      * TLS 1.3 specific
+      * Return a list of groups to provide prepared key share offers in the
+      * initial client hello for. Groups in this list must be reflected in
+      * key_exchange_groups() and in the same order. By default this returns
+      * the most preferred group from key_exchange_groups().
+      * If an empty list is returned, no prepared key share offers are sent
+      * and the decision of the group to use is left to the server.
+      */
+      virtual std::vector<Group_Params> key_exchange_groups_to_offer() const;
+
+      /**
       * Request that ECC curve points are sent compressed
       */
       virtual bool use_ecc_point_compression() const;
@@ -504,6 +515,8 @@ class BOTAN_PUBLIC_API(2,0) Text_Policy : public Policy
 
       std::vector<Group_Params> key_exchange_groups() const override;
 
+      std::vector<Group_Params> key_exchange_groups_to_offer() const override;
+
       bool use_ecc_point_compression() const override;
 
       bool allow_tls12() const override;
@@ -561,6 +574,8 @@ class BOTAN_PUBLIC_API(2,0) Text_Policy : public Policy
 
       std::vector<std::string> get_list(const std::string& key,
                                         const std::vector<std::string>& def) const;
+
+      std::vector<Group_Params> read_group_list(const std::string &group_str) const;
 
       size_t get_len(const std::string& key, size_t def) const;
 
