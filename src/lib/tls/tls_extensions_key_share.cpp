@@ -75,15 +75,16 @@ class Key_Share_Entry
          }
       }
 
-      Key_Share_Entry(Named_Group group, std::unique_ptr<Private_Key> private_key)
+      Key_Share_Entry(Named_Group group, std::vector<uint8_t> key_exchange, std::unique_ptr<Private_Key> private_key)
          : m_group(group)
-         , m_key_exchange(private_key->public_key_bits())
+         , m_key_exchange(std::move(key_exchange))
          , m_private_key(std::move(private_key)) {}
 
       bool empty() const { return (m_group == Group_Params::NONE) && m_key_exchange.empty(); }
 
       std::vector<uint8_t> serialize() const{
          std::vector<uint8_t> result;
+         result.reserve(m_key_exchange.size() + 2);
 
          const uint16_t named_curve_id = static_cast<uint16_t>(m_group);
          result.push_back(get_byte<0>(named_curve_id));
@@ -164,10 +165,12 @@ class Key_Share_ClientHello final : public Key_Share_Content
             }
 
             if (is_x25519(group)) {
-               kse.emplace_back(group, std::make_unique<X25519_PrivateKey>(rng));
+               auto skey = std::make_unique<X25519_PrivateKey>(rng);
+               auto pval = skey->public_value();
+               kse.emplace_back(group, std::move(pval), std::move(skey));
             } else if (is_ecdh(group)) {
                const EC_Group ec_group(cb.tls_decode_group_param(group));
-               auto private_key = std::make_unique<ECDH_PrivateKey>(rng, ec_group);
+               auto skey = std::make_unique<ECDH_PrivateKey>(rng, ec_group);
 
                // RFC 8446 Ch. 4.2.8.2
                //
@@ -177,8 +180,8 @@ class Key_Share_ClientHello final : public Key_Share_Content
                //
                // Hence, we neither need to take Policy::use_ecc_point_compression() nor
                // ClientHello::prefers_compressed_ec_points() into account here.
-               private_key->set_point_encoding(PointGFp::UNCOMPRESSED);
-               kse.emplace_back(group, std::move(private_key));
+               auto pval = skey->public_value(PointGFp::UNCOMPRESSED);
+               kse.emplace_back(group, std::move(pval), std::move(skey));
             } else if (is_dh(group)) {
                // RFC 8446 Ch. 4.2.8.1
                //
@@ -186,11 +189,9 @@ class Key_Share_ClientHello final : public Key_Share_Content
                //   public value (Y = g^X mod p) for the specified group (see [RFC7919]
                //   for group definitions) encoded as a big-endian integer and padded to
                //   the left with zeros to the size of p in bytes.
-               //
-               // TODO: the encoding for DH is currently based on the DER_Encoder (see dl_algo.cpp)
-               //       and this is likely not conforming to RFC 8446!
-               const DL_Group dl_group(cb.tls_decode_group_param(group));
-               kse.emplace_back(group, std::make_unique<DH_PrivateKey>(rng, dl_group));
+               auto skey = std::make_unique<DH_PrivateKey>(rng, DL_Group(cb.tls_decode_group_param(group)));
+               auto pval = skey->public_value();
+               kse.emplace_back(group, std::move(pval), std::move(skey));
             } else {
                throw Decoding_Error("cannot create a key offering without a group definition");
             }

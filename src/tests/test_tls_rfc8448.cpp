@@ -364,7 +364,7 @@ class Test_TLS_RFC8448 final : public Test
            "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
            "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
            "00 00 00"
-           /* verious extensions follow */);
+           /* various extensions follow */);
 
          result.test_eq("TLS client hello without extensions", apply_mask(client_hello_record, mask),
                                                                apply_mask(expected_hello, mask));
